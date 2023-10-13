@@ -4,7 +4,7 @@ set -euo pipefail
 
 IMAGE_REGISTRY="ghcr.io"
 IMAGE_NAME="${IMAGE_REGISTRY}/lbogdan/example-app"
-PULL=""
+PUSH=""
 
 if ! git status | grep -q 'working tree clean'; then
   echo "ERROR: There are uncomitted changes." >&2
@@ -18,14 +18,18 @@ fi
 
 while [ "$#" -ne 0 ]; do
   case "$1" in
-    --pull)
-      PULL="1"
+    --PUSH)
+      PUSH="1"
+      ;;
+    *)
+      echo "ERROR: unknown argument \"$1\"." >&2
+      exit 1
   esac
   shift
 done
 
 docker build -t "$IMAGE_NAME:$TAG" .
 
-if [ -n "$PULL" ]; then
-  docker pull "$IMAGE_NAME:$TAG"
+if [ -n "$PUSH" ]; then
+  docker push "$IMAGE_NAME:$TAG"
 fi
