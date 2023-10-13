@@ -20,8 +20,15 @@ RUN yarn bundle
 
 FROM node:18.18.0-bookworm-slim
 
+# this should be set when building
+ARG VERSION
+ENV VERSION=$VERSION
+
 WORKDIR /app
 
 COPY --from=build /build/dist/bundle.mjs ./
+
+# this is purely informational
+EXPOSE 3000/tcp
 
 ENTRYPOINT ["node", "bundle.mjs"]

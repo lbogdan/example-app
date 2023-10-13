@@ -28,7 +28,7 @@ while [ "$#" -ne 0 ]; do
   shift
 done
 
-docker build -t "$IMAGE_NAME:$TAG" .
+docker build --build-arg="VERSION=$TAG" --tag="$IMAGE_NAME:$TAG" .
 
 if [ -n "$PUSH" ]; then
   docker push "$IMAGE_NAME:$TAG"
