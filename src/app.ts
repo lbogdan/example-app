@@ -45,7 +45,7 @@ export function app(entrypoint: string): void {
     // }
     // ctx.body = hashedPassword;
     if (ASYNC_QUEUE) {
-      ctx.body = await new Promise((resolve) => {
+      const hash = await new Promise((resolve) => {
         const worker = new Worker(/* './src/hash.ts' */ entrypoint, {
           workerData: JSON.stringify({ password, rounds: config.rounds }),
         });
@@ -54,6 +54,7 @@ export function app(entrypoint: string): void {
           console.log(`worker exited with code ${code}`)
         );
       });
+      response(ctx, { hash });
     } else {
       response(ctx, { hash: hashSync(password, config.rounds) });
     }
