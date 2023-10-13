@@ -18,7 +18,7 @@ fi
 
 while [ "$#" -ne 0 ]; do
   case "$1" in
-    --PUSH)
+    --push)
       PUSH="1"
       ;;
     *)
