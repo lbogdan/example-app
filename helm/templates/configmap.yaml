@@ -1,0 +1,11 @@
+{{- $environment := required "environment is not set" .Values.environment -}}
+{{- $config := dict "environment" $environment -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "helm.fullname" . }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {{- merge $config .Values.config | toPrettyJson | nindent 4 }}

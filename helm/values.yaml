@@ -1,0 +1,19 @@
+# environment: production
+
+config:
+  rounds: 10
+
+replicaCount: 1
+
+image:
+  registry: ghcr.io
+  repository: lbogdan/example-app
+  tag: v0.0.3
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  className: nginx
+  tls: false
