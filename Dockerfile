@@ -24,7 +24,8 @@ FROM node:18.18.0-bookworm-slim
 ARG VERSION
 ENV VERSION=$VERSION
 
-USER node:node
+# run as user:group node:node
+USER 1000:1000
 
 WORKDIR /app
 
