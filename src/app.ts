@@ -26,6 +26,12 @@ function response(ctx: RouterContext, res: object): void {
   };
 }
 
+async function signalHandler(signal: NodeJS.Signals): Promise<void> {
+  console.log(`got signal ${signal}, cleaning up`);
+  await setTimeout(5000);
+  process.exit();
+}
+
 export function app(entrypoint: string): void {
   const app = new Koa();
   const router = new Router();
@@ -72,4 +78,9 @@ export function app(entrypoint: string): void {
     });
 
   watchConfig();
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  process.on('SIGINT', signalHandler);
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  process.on('SIGTERM', signalHandler);
 }
