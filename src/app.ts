@@ -5,6 +5,7 @@ import { Worker } from 'node:worker_threads';
 // import { compareSync, hashSync } from 'bcryptjs';
 import Koa from 'koa';
 import Router from '@koa/router';
+import logger from 'koa-logger';
 
 import { config, watchConfig } from './config.js';
 import { hashSync } from './hash.js';
@@ -71,6 +72,7 @@ export function app(entrypoint: string): void {
   });
 
   app
+    .use(logger())
     .use(router.routes())
     .use(router.allowedMethods())
     .listen(PORT, () => {
