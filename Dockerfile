@@ -24,6 +24,8 @@ FROM node:18.18.0-bookworm-slim
 ARG VERSION
 ENV VERSION=$VERSION
 
+USER node:node
+
 WORKDIR /app
 
 COPY --from=build /build/dist/bundle.mjs ./
