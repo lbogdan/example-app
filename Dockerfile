@@ -1,4 +1,4 @@
-FROM node:18.18.0-bookworm-slim AS build
+FROM node:18.18.2-bookworm-slim AS build
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ COPY ./ ./
 
 RUN yarn bundle
 
-FROM node:18.18.0-bookworm-slim
+FROM node:18.18.2-bookworm-slim
 
 # this should be set when building
 ARG VERSION
