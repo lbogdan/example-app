@@ -20,14 +20,30 @@ spec:
         env:
         - name: CONFIG_FILE
           value: /config/config.json
+        - name: POSTGRES_PASSWORD
+          value: abcd1234
         ports:
         - containerPort: 3000
           name: http
           protocol: TCP
+        {{- if .Values.security.enabled }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        {{- end }}
         volumeMounts:
         - name: config
           mountPath: /config
+        - name: data
+          mountPath: /data
       volumes:
       - name: config
         configMap:
           name: example-app
+      - name: data
+        emptyDir: {}

@@ -12,4 +12,5 @@ spec:
     targetPort: http
   selector:
     {{- include "helm.selectorLabels" . | nindent 4 }}
-  type: {{ .Values.service.type }}
+{{- /*  # type: {{ .Values.service.type }}
+  # type: ClusterIP # default */}}

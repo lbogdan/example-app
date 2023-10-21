@@ -1,19 +1,32 @@
 # environment: production
 
-config:
-  rounds: 10
+config: {}
 
 replicaCount: 1
 
 image:
   registry: ghcr.io
   repository: lbogdan/example-app
-  tag: v0.0.3
+  tag: v0.0.16
 
-service:
-  type: ClusterIP
+# service:
+#   type: ClusterIP
 
 ingress:
   enabled: false
   className: nginx
   tls: false
+
+security:
+  enabled: false
+
+postgresql:
+  enabled: false
+  primary:
+    persistence:
+      size: 1Gi
+  auth:
+    enablePostgresUser: false
+    username: example-app
+    password: abcd1234
+    database: example-app
