@@ -1,0 +1,24 @@
+---
+kind: pipeline
+name: branch
+
+steps:
+  - name: build and push image
+    image: plugins/docker
+    settings:
+      repo: lbogdan/example-app
+      tags:
+      - latest
+      - ${DRONE_TAG}
+      username: lbogdan
+      password:
+        from_secret: docker-password
+
+trigger:
+  ref:
+  - refs/tags/v*
+---
+kind: signature
+hmac: f71a195e6d747b993e93cba86697abff46e5152f3bf5d1e2a1bfcae2b9f1bd52
+
+...
