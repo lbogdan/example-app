@@ -9,28 +9,30 @@ const configSchema = z.object({
   rounds: z.number(),
   environment: z.string(),
   version: z.string(),
+  dbType: z.enum(['sqlite', 'postgresql']),
+  sqliteDbPath: z.string().optional(),
+  postgresHost: z.string().optional(),
+  postgresUser: z.string(),
+  postgresDb: z.string(),
 });
 
 type Config = z.infer<typeof configSchema>;
 
+const defaultConfig: Partial<Config> = {
+  version: process.env['VERSION'] ?? 'N/A',
+  dbType: 'sqlite',
+  postgresUser: 'example-app',
+  postgresDb: 'example-app',
+};
+
 const configData = await readFile(configPath, { encoding: 'utf8' });
 
 export const config: Config = configSchema.parse({
+  ...defaultConfig,
   ...JSON.parse(configData),
-  version: process.env['VERSION'] ?? 'N/A',
 });
 
 console.log('config:', config);
-
-/*
-const watcher = watch(configPath);
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async function (): Promise<void> {
-  for await (const event of watcher) {
-    console.log(event);
-  }
-})();
-*/
 
 export function watchConfig(): void {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -39,8 +41,8 @@ export function watchConfig(): void {
     try {
       const configData = await readFile(configPath, { encoding: 'utf8' });
       const newConfig = configSchema.parse({
+        ...defaultConfig,
         ...JSON.parse(configData),
-        version: process.env['VERSION'] ?? 'N/A',
       });
       Object.keys(config).forEach((key) => {
         delete (config as Partial<Config>)[key as keyof Config];

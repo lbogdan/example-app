@@ -6,7 +6,7 @@ const entrypoint = new URL(import.meta.url).pathname;
 
 if (isMainThread) {
   const { app } = await import('./app.js');
-  app(entrypoint);
+  await app(entrypoint);
 } else {
   hash();
 }

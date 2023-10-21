@@ -1,8 +1,8 @@
+import { strict as assert } from 'node:assert';
 import { hostname } from 'node:os';
 import { setTimeout } from 'node:timers/promises';
 import { Worker } from 'node:worker_threads';
 
-// import { compareSync, hashSync } from 'bcryptjs';
 import Koa from 'koa';
 import Router from '@koa/router';
 import logger from 'koa-logger';
@@ -33,42 +33,66 @@ async function signalHandler(signal: NodeJS.Signals): Promise<void> {
   process.exit();
 }
 
-export function app(entrypoint: string): void {
+export async function app(entrypoint: string): Promise<void> {
   const app = new Koa();
   const router = new Router();
+
+  const db =
+    config.dbType === 'sqlite'
+      ? await import('./db/sqlite.js')
+      : await import('./db/postgres.js');
 
   router.get('/', async (ctx) => {
     await setTimeout(1000);
     ctx.body = 'OK';
   });
 
-  router.get('/hash', async (ctx) => {
-    const password = 'foobarbaz';
-    // const hashedPassword = hashSync(password, 16);
-    // for (let i = 0; i < 1; i++) {
-    //   if (!compareSync(password, hashedPassword)) {
-    //     throw new Error('invalid hash');
-    //   }
-    // }
-    // ctx.body = hashedPassword;
+  router.get('/hash/:message', async (ctx) => {
+    const message = ctx.params['message'];
+    assert(message, 'message is not set');
     if (ASYNC_QUEUE) {
       const hash = await new Promise((resolve) => {
         const worker = new Worker(/* './src/hash.ts' */ entrypoint, {
-          workerData: JSON.stringify({ password, rounds: config.rounds }),
+          workerData: JSON.stringify({
+            password: message,
+            rounds: config.rounds,
+          }),
         });
         worker.on('message', resolve);
         worker.on('exit', (code) =>
           console.log(`worker exited with code ${code}`)
         );
       });
-      response(ctx, { hash });
+      response(ctx, { hash, message });
     } else {
-      response(ctx, { hash: hashSync(password, config.rounds) });
+      response(ctx, { hash: hashSync(message, config.rounds), message });
     }
   });
 
   router.get('/livez', (ctx) => {
     ctx.body = 'OK';
+  });
+
+  router.get('/counter/:id', async (ctx) => {
+    const id = ctx.params['id'];
+    assert(id, 'id is not set');
+    const counter = await db.get(parseInt(id));
+    if (counter) {
+      response(ctx, { counter });
+    } else {
+      ctx.status = 404;
+    }
+  });
+
+  router.get('/counter/:id/inc', async (ctx) => {
+    const id = ctx.params['id'];
+    assert(id, 'id is not set');
+    const counter = await db.increment(parseInt(id));
+    if (counter) {
+      response(ctx, { counter });
+    } else {
+      ctx.status = 404;
+    }
   });
 
   app
@@ -79,10 +103,14 @@ export function app(entrypoint: string): void {
       console.log(`listening on http://localhost:${PORT}/`);
     });
 
+  await db.createTable();
+
   watchConfig();
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('SIGINT', signalHandler);
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('SIGTERM', signalHandler);
+  if (config.environment !== 'development') {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    process.on('SIGINT', signalHandler);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    process.on('SIGTERM', signalHandler);
+  }
 }
