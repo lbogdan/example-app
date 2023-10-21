@@ -14,12 +14,14 @@ steps:
       username: lbogdan
       password:
         from_secret: harbor-password
+      build_args:
+        - VERSION=${DRONE_TAG}
 
 trigger:
   ref:
   - refs/tags/v*
 ---
 kind: signature
-hmac: 908aca4e5d629da35829cb2cfc525144099a151fc2a5c39aa26c40d7fddc2abc
+hmac: 0ae779c7a9604a71a554e90341e7891a40e6182ad31e2b68f2ea0b878532fe0d
 
 ...
