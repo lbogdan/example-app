@@ -2,13 +2,16 @@ import pg from 'pg';
 
 import { config } from '../config.js';
 
+const postgresPassword = process.env['POSTGRES_PASSWORD'];
+if (!postgresPassword) {
+  throw new Error('POSTGRES_PASSWORD not set');
+}
+
 const client = new pg.Client({
-  // host: 'test-rw.default',
+  host: config.postgresHost,
   user: config.postgresUser,
-  // password: 'VDhtfD2dc7XGc54EMmNUdasuZ6QQqHsRu4NoBevXiVXQUY4mz09RxflCkMRw3IWO',
   database: config.postgresDb,
-  host: 'example-app-postgresql',
-  password: 'abcd1234',
+  password: postgresPassword,
 });
 
 await client.connect();

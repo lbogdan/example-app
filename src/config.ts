@@ -11,16 +11,19 @@ const configSchema = z.object({
   version: z.string(),
   dbType: z.enum(['sqlite', 'postgresql']),
   sqliteDbPath: z.string().optional(),
-  postgresHost: z.string().optional(),
+  postgresHost: z.string(),
   postgresUser: z.string(),
   postgresDb: z.string(),
 });
 
 type Config = z.infer<typeof configSchema>;
 
-const defaultConfig: Partial<Config> = {
+const defaultConfig: Config = {
+  rounds: 10,
+  environment: 'development',
   version: process.env['VERSION'] ?? 'N/A',
   dbType: 'sqlite',
+  postgresHost: 'example-app',
   postgresUser: 'example-app',
   postgresDb: 'example-app',
 };
