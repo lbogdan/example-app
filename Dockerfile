@@ -18,6 +18,11 @@ COPY ./ ./
 
 RUN yarn bundle
 
+RUN mkdir sqlite3 && \
+    cd sqlite3 && \
+    yarn init -y && \
+    yarn add sqlite3@5.1.6 --prod
+
 FROM node:18.18.2-bookworm-slim
 
 # this should be set when building
@@ -30,6 +35,7 @@ USER 1000:1000
 WORKDIR /app
 
 COPY --from=build /build/dist/bundle.mjs ./
+COPY --from=build /build/sqlite3/node_modules ./node_modules/
 
 # this is purely informational
 EXPOSE 3000/tcp

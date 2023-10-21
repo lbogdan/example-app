@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx --watch --watch-preserve-output ./src/index.ts",
-    "bundle": "esbuild ./src/index.ts --bundle --format=esm --outfile=./dist/bundle.mjs --platform=node --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --external:mock-aws-s3 --external:aws-sdk --external:nock"
+    "bundle": "esbuild ./src/index.ts --bundle --format=esm --outfile=./dist/bundle.mjs --platform=node --banner:js=\"const require = (await import('node:module')).createRequire(import.meta.url);const __filename = (await import('node:url')).fileURLToPath(import.meta.url);const __dirname = (await import('node:path')).dirname(__filename);\" --external:sqlite3"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
