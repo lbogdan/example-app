@@ -1,25 +1,25 @@
 ---
 kind: pipeline
-name: branch
+name: build
 
 steps:
   - name: build and push image
     image: plugins/docker
     settings:
-      registry: ghcr.io
-      repo: ghcr.io/lbogdan/example-app
+      registry: cr.37-27-0-62.sslip.io
+      repo: cr.37-27-0-62.sslip.io/lbogdan/example-app
       tags:
       - latest
       - ${DRONE_TAG}
       username: lbogdan
       password:
-        from_secret: ghcr-password
+        from_secret: harbor-password
 
 trigger:
   ref:
   - refs/tags/v*
 ---
 kind: signature
-hmac: f5c9b7774e68578b71500449e39a43f6dd896a402e6a89f30a6a941472778f1f
+hmac: 908aca4e5d629da35829cb2cfc525144099a151fc2a5c39aa26c40d7fddc2abc
 
 ...
