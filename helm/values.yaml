@@ -1,6 +1,7 @@
 # environment: production
 
-config: {}
+config:
+  sqliteDbPath: /data/example-app.sqlite
 
 replicaCount: 1
 
