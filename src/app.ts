@@ -77,7 +77,7 @@ export async function app(entrypoint: string): Promise<void> {
     const id = ctx.params['id'];
     assert(id, 'id is not set');
     const counter = await db.get(parseInt(id));
-    if (counter) {
+    if (counter !== undefined) {
       response(ctx, { counter });
     } else {
       ctx.status = 404;
