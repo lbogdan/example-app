@@ -23,7 +23,7 @@ const defaultConfig: Config = {
   environment: 'development',
   version: process.env['VERSION'] ?? 'N/A',
   dbType: 'sqlite',
-  postgresHost: 'example-app',
+  postgresHost: 'example-app-postgresql',
   postgresUser: 'example-app',
   postgresDb: 'example-app',
 };

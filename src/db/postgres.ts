@@ -12,6 +12,7 @@ const client = new pg.Client({
   user: config.postgresUser,
   database: config.postgresDb,
   password: postgresPassword,
+  connectionTimeoutMillis: 1000,
 });
 
 await client.connect();
