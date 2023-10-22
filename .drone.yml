@@ -20,8 +20,28 @@ steps:
 trigger:
   ref:
   - refs/tags/v*
+  event:
+    exclude:
+      - promote
+---
+kind: pipeline
+name: deploy
+
+steps:
+  - name: deploy
+    image: lbogdan/drone-deploy-plugin:v0.0.4
+    settings:
+      app_name: example-app
+      repo: lbogdan/gitops-test
+      ssh_key:
+        from_secret: ssh-key
+      file: /$$APP/$$ENV.yaml
+
+trigger:
+  event:
+    - promote
 ---
 kind: signature
-hmac: 0ae779c7a9604a71a554e90341e7891a40e6182ad31e2b68f2ea0b878532fe0d
+hmac: 87da9b8eafb139de6b96a4086c81f3aa4824e6f476b011064a2077035951a9e3
 
 ...
