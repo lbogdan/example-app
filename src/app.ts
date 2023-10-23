@@ -73,6 +73,10 @@ export async function app(entrypoint: string): Promise<void> {
     ctx.body = 'OK';
   });
 
+  router.get('/healthz', (ctx) => {
+    ctx.body = 'OK';
+  });
+
   router.get('/counter/:id', async (ctx) => {
     const id = ctx.params['id'];
     assert(id, 'id is not set');
