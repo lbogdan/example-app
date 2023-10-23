@@ -45,9 +45,12 @@ export async function get(id: number): Promise<number | undefined> {
   return res.rows[0]!.counter;
 }
 
-export async function increment(id: number): Promise<number | undefined> {
+export async function increment(
+  id: number,
+  delta: number
+): Promise<number | undefined> {
   const res = await client.query<{ id: number; counter: number }>(
-    `UPDATE counters SET counter=counter+1 WHERE id=${id} RETURNING *`
+    `UPDATE counters SET counter=counter+${delta} WHERE id=${id} RETURNING *`
   );
 
   if (res.rowCount === 0) {

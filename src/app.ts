@@ -120,7 +120,7 @@ export async function app(entrypoint: string): Promise<void> {
   router.get('counter-increment', '/counter/:id/inc', async (ctx) => {
     const id = ctx.params['id'];
     assert(id, 'id is not set');
-    const counter = await db.increment(parseInt(id));
+    const counter = await db.increment(parseInt(id), 5);
     if (counter) {
       response(ctx, { counter });
     } else {
