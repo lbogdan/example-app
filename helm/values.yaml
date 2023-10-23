@@ -1,6 +1,9 @@
 environment: development
 
 config:
+  # number of bcrypt rounds used in /hash
+  rounds: 10
+  # database type used for /counter; one of sqlite, postgresql
   dbType: sqlite
   sqliteDbPath: /data/example-app.sqlite
 
@@ -13,11 +16,14 @@ image:
 
 ingress:
   enabled: false
+  host: ""
   className: nginx
   tls: false
 
 security:
+  # add container settings to pass the restricted Pod Security Standard
   enabled: false
+  # create network policy that only allows connections to the database from the app
   network: false
 
 postgresql:
@@ -28,12 +34,10 @@ postgresql:
   auth:
     enablePostgresUser: false
     username: example-app
-
     # this is not used, it's only set to fix a helm-diff issue:
     # diff is breaking for specific checks performed by bitnami/common -
     # https://github.com/databus23/helm-diff/issues/460
     password: dummy
-
     database: example-app
     existingSecret: example-app-postgresql
     secretKeys:
@@ -64,9 +68,7 @@ probes:
     enabled: true
     httpGet:
       path: /healthz
-      port: 3000
   liveness:
     enabled: false
     httpGet:
       path: /livez
-      port: 3000
