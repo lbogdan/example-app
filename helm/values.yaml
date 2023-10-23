@@ -9,7 +9,7 @@ replicas: 1
 image:
   registry: cr.37-27-0-62.sslip.io
   repository: lbogdan/example-app
-  tag: v0.0.19
+  tag: v0.0.20
 
 ingress:
   enabled: false
@@ -40,7 +40,7 @@ postgresql:
       userPasswordKey: password
 
 secrets:
-  postgresPassword: abcd1234
+  postgresPassword: ajRvm5BQpAUQqWFB
 
 resources:
   requests:
