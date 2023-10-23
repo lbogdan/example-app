@@ -1,0 +1,12 @@
+dev:
+  example-app:
+    image: node:18.18.0-bookworm-slim
+    command: bash
+    sync:
+    - .:/app
+    persistentVolume:
+      enabled: true
+      size: 1Gi
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
