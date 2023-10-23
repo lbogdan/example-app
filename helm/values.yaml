@@ -29,7 +29,7 @@ postgresql:
     enablePostgresUser: false
     username: example-app
 
-    # this is not used, it's only set to fix
+    # this is not used, it's only set to fix a helm-diff issue:
     # diff is breaking for specific checks performed by bitnami/common -
     # https://github.com/databus23/helm-diff/issues/460
     password: dummy
@@ -66,7 +66,7 @@ probes:
       path: /healthz
       port: 3000
   liveness:
-    enabled: true
+    enabled: false
     httpGet:
       path: /livez
       port: 3000
