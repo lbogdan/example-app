@@ -1,20 +1,21 @@
 import { strict as assert } from 'node:assert';
 import { hostname } from 'node:os';
-import { setTimeout } from 'node:timers/promises';
+import { setTimeout as setTimeoutAsync } from 'node:timers/promises';
 import { Worker } from 'node:worker_threads';
 
 import Koa from 'koa';
 import Router from '@koa/router';
-import logger from 'koa-logger';
 
 import { config, watchConfig } from './config.js';
 import { hashSync } from './hash.js';
 
+import type { Next } from 'koa';
 import type { RouterContext } from '@koa/router';
 
 const envPort = process.env['PORT'];
 const PORT = envPort ? parseInt(envPort) : 3000;
 const ASYNC_QUEUE = process.env['ASYNC_QUEUE'] !== '0';
+let healthy = true;
 
 function response(ctx: RouterContext, res: object): void {
   ctx.body = {
@@ -29,8 +30,36 @@ function response(ctx: RouterContext, res: object): void {
 
 async function signalHandler(signal: NodeJS.Signals): Promise<void> {
   console.log(`got signal ${signal}, cleaning up`);
-  await setTimeout(5000);
+  await setTimeoutAsync(5000);
   process.exit();
+}
+
+async function logMiddleware(ctx: RouterContext, next: Next): Promise<void> {
+  // const routeName = ctx._matchedRouteName;
+  const log = true; // routeName !== 'health' && routeName !== 'live';
+  if (log) {
+    console.log(ctx.method, ctx.url);
+  }
+  const start = new Date().getTime();
+  try {
+    await next();
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = {
+      error: err instanceof Error ? err.message : JSON.stringify(err),
+    };
+  }
+  const elapsed = new Date().getTime() - start;
+  if (log) {
+    console.log(
+      ctx.method,
+      ctx.url,
+      ctx.status,
+      ctx._matchedRouteName,
+      elapsed
+    );
+  }
 }
 
 export async function app(entrypoint: string): Promise<void> {
@@ -42,12 +71,7 @@ export async function app(entrypoint: string): Promise<void> {
       ? await import('./db/sqlite.js')
       : await import('./db/postgres.js');
 
-  router.get('/', async (ctx) => {
-    await setTimeout(1000);
-    ctx.body = 'OK';
-  });
-
-  router.get('/hash/:message', async (ctx) => {
+  router.get('hash', '/hash/:message', async (ctx) => {
     const message = ctx.params['message'];
     assert(message, 'message is not set');
     if (ASYNC_QUEUE) {
@@ -69,15 +93,20 @@ export async function app(entrypoint: string): Promise<void> {
     }
   });
 
-  router.get('/livez', (ctx) => {
+  router.get('live', '/livez', (ctx) => {
     ctx.body = 'OK';
   });
 
-  router.get('/healthz', (ctx) => {
+  router.get('health', '/healthz', (ctx) => {
+    if (!healthy) {
+      ctx.status = 500;
+      return;
+    }
+
     ctx.body = 'OK';
   });
 
-  router.get('/counter/:id', async (ctx) => {
+  router.get('counter', '/counter/:id', async (ctx) => {
     const id = ctx.params['id'];
     assert(id, 'id is not set');
     const counter = await db.get(parseInt(id));
@@ -88,7 +117,7 @@ export async function app(entrypoint: string): Promise<void> {
     }
   });
 
-  router.get('/counter/:id/inc', async (ctx) => {
+  router.get('counter-increment', '/counter/:id/inc', async (ctx) => {
     const id = ctx.params['id'];
     assert(id, 'id is not set');
     const counter = await db.increment(parseInt(id));
@@ -99,8 +128,26 @@ export async function app(entrypoint: string): Promise<void> {
     }
   });
 
+  router.get('/error', async () => {
+    await setTimeoutAsync(500);
+    throw new Error('error endpoint');
+  });
+
+  router.get('/health-fail', (ctx) => {
+    const failFor = ctx.query['for'];
+    assert(typeof failFor === 'string', 'for is not set');
+    healthy = false;
+    setTimeout(
+      () => {
+        healthy = true;
+      },
+      parseInt(failFor) * 1000
+    );
+    response(ctx, { message: `health check failing for next ${failFor}s` });
+  });
+
   app
-    .use(logger())
+    .use(logMiddleware)
     .use(router.routes())
     .use(router.allowedMethods())
     .listen(PORT, () => {
