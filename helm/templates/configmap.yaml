@@ -1,5 +1,14 @@
-{{- $environment := required "environment is not set" .Values.environment -}}
-{{- $config := dict "environment" $environment -}}
+{{- $config := .Values.config }}
+{{- $environment := required "environment is not set" .Values.environment }}
+{{- $_ := set $config "environment" $environment }}
+{{- if ne .Values.config.dbType "sqlite" }}
+{{- $_ = unset $config "sqliteDbPath" }}
+{{- end }}
+{{- if .Values.externalPostgresql.enabled }}
+{{ $_ := set $config "postgresqlHost" .Values.externalPostgresql.host }}
+{{ $_ := set $config "postgresqlUsername" .Values.externalPostgresql.username }}
+{{ $_ := set $config "postgresqlDatabase" .Values.externalPostgresql.database }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,4 +17,4 @@ metadata:
     {{- include "helm.labels" . | nindent 4 }}
 data:
   config.json: |
-    {{- merge $config .Values.config | toPrettyJson | nindent 4 }}
+    {{- $config | toPrettyJson | nindent 4 }}

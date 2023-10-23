@@ -5,7 +5,9 @@ metadata:
   labels:
     {{- include "helm.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  {{- if not .Values.autoscale.enabled }}
+  replicas: {{ .Values.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "helm.selectorLabels" . | nindent 6 }}
@@ -20,12 +22,30 @@ spec:
         env:
         - name: CONFIG_FILE
           value: /config/config.json
+        {{- if eq .Values.config.dbType "postgresql" }}
         - name: POSTGRES_PASSWORD
-          value: abcd1234
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "helm.fullname" . }}-postgresql
+              key: password
+          value: null
+        {{- end}}
         ports:
         - containerPort: 3000
           name: http
           protocol: TCP
+        {{- if .Values.probes.readiness.enabled }}
+        readinessProbe:
+          {{- toYaml (omit .Values.probes.readiness "enabled") | nindent 10 }}
+        {{- end }}
+        {{- if .Values.probes.liveness.enabled }}
+        livenessProbe:
+          {{- toYaml (omit .Values.probes.liveness "enabled") | nindent 10 }}
+        {{- end }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
         {{- if .Values.security.enabled }}
         securityContext:
           allowPrivilegeEscalation: false
@@ -39,11 +59,15 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /config
+        {{- if eq .Values.config.dbType "sqlite" }}
         - name: data
           mountPath: /data
+        {{- end }}
       volumes:
       - name: config
         configMap:
           name: example-app
+      {{- if eq .Values.config.dbType "sqlite" }}
       - name: data
         emptyDir: {}
+      {{- end }}

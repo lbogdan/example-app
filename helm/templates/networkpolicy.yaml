@@ -1,0 +1,19 @@
+{{- if and .Values.postgresql.enabled .Values.security.network }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "helm.fullname" . }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: primary
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: postgresql
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "helm.selectorLabels" . | nindent 14 }}
+{{- end }}

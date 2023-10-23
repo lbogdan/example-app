@@ -1,17 +1,15 @@
-# environment: production
+environment: development
 
 config:
+  dbType: sqlite
   sqliteDbPath: /data/example-app.sqlite
 
-replicaCount: 1
+replicas: 1
 
 image:
-  registry: ghcr.io
+  registry: cr.37-27-0-62.sslip.io
   repository: lbogdan/example-app
-  tag: v0.0.16
-
-# service:
-#   type: ClusterIP
+  tag: v0.0.19
 
 ingress:
   enabled: false
@@ -20,6 +18,7 @@ ingress:
 
 security:
   enabled: false
+  network: false
 
 postgresql:
   enabled: false
@@ -29,5 +28,45 @@ postgresql:
   auth:
     enablePostgresUser: false
     username: example-app
-    password: abcd1234
+
+    # this is not used, it's only set to fix
+    # diff is breaking for specific checks performed by bitnami/common -
+    # https://github.com/databus23/helm-diff/issues/460
+    password: dummy
+
     database: example-app
+    existingSecret: example-app-postgresql
+    secretKeys:
+      userPasswordKey: password
+
+secrets:
+  postgresPassword: abcd1234
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 128Mi
+  limits:
+    cpu: 1
+    memory: 256Mi
+
+autoscale:
+  enabled: false
+
+externalPostgresql:
+  enabled: false
+  host: ""
+  username: ""
+  database: ""
+
+probes:
+  readiness:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: 3000
+  liveness:
+    enabled: true
+    httpGet:
+      path: /livez
+      port: 3000
