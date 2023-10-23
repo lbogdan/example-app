@@ -30,7 +30,7 @@ ARG VERSION
 ENV VERSION=$VERSION
 
 # run as user:group node:node
-USER 1000:1000
+# USER 1000:1000
 
 WORKDIR /app
 
