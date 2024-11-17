@@ -31,7 +31,7 @@ function response(ctx: RouterContext, res: object): void {
 
 async function signalHandler(signal: NodeJS.Signals): Promise<void> {
   console.log(`got signal ${signal}, cleaning up`);
-  await setTimeoutAsync(5 * SECOND);
+  await setTimeoutAsync(10 * SECOND);
   process.exit();
 }
 
@@ -148,7 +148,7 @@ export async function app(entrypoint: string): Promise<void> {
   });
 
   console.log('doing initialization work');
-  await setTimeoutAsync(5 * SECOND);
+  await setTimeoutAsync(10 * SECOND);
 
   app
     .use(logMiddleware)
