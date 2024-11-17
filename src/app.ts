@@ -15,6 +15,7 @@ import type { RouterContext } from '@koa/router';
 const envPort = process.env['PORT'];
 const PORT = envPort ? parseInt(envPort) : 3000;
 const ASYNC_QUEUE = process.env['ASYNC_QUEUE'] !== '0';
+const SECOND = 1000; // ms
 let healthy = true;
 
 function response(ctx: RouterContext, res: object): void {
@@ -30,7 +31,7 @@ function response(ctx: RouterContext, res: object): void {
 
 async function signalHandler(signal: NodeJS.Signals): Promise<void> {
   console.log(`got signal ${signal}, cleaning up`);
-  await setTimeoutAsync(5000);
+  await setTimeoutAsync(5 * SECOND);
   process.exit();
 }
 
@@ -145,6 +146,9 @@ export async function app(entrypoint: string): Promise<void> {
     );
     response(ctx, { message: `health check failing for next ${failFor}s` });
   });
+
+  console.log('doing initialization work');
+  await setTimeoutAsync(5 * SECOND);
 
   app
     .use(logMiddleware)
