@@ -4,6 +4,10 @@ on:
   push:
     tags: v[0-9]*
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: self-hosted
@@ -14,6 +18,11 @@ jobs:
       # -
       #   name: Show environment
       #   run: env
+      -
+        name: Login to GitHub container registry
+        run: echo $GH_TOKEN | docker login ghcr.io -u lbogdan --password-stdin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push image
         run: ./scripts/build.sh --push
