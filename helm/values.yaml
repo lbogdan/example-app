@@ -10,7 +10,7 @@ config:
 replicas: 1
 
 image:
-  registry: cr.37-27-0-62.sslip.io
+  registry: ghcr.io
   repository: lbogdan/example-app
   tag: v0.0.20
 
@@ -48,7 +48,7 @@ secrets:
 
 resources:
   requests:
-    cpu: 500m
+    cpu: 250m
     memory: 128Mi
   limits:
     cpu: 1
@@ -56,6 +56,12 @@ resources:
 
 autoscale:
   enabled: false
+  maxReplicas: 4
+  # in procents, relative to resource.requests.cpu (not limits)
+  # e.g. when requests.cpu is 250m, average utilization is 250m x 200% = 500m
+  averageUtilization: 200
+  scaleDown:
+    stabilizationWindowSeconds: 60
 
 externalPostgresql:
   enabled: false
@@ -68,7 +74,9 @@ probes:
     enabled: true
     httpGet:
       path: /healthz
+      port: http
   liveness:
     enabled: false
     httpGet:
       path: /livez
+      port: http
